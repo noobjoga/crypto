@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>MazeLoop Crypto — Mercado Cripto e Simulador de Investimento</title>
+  <meta name="description" content="Acompanhe Bitcoin, Ethereum, Solana e outras criptomoedas e simule investimentos fictícios em tempo real.">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://crypto.mazeloop.com/">
+
+  <meta property="og:title" content="MazeLoop Crypto — Cripto em tempo real">
+  <meta property="og:description" content="Preços, variação e simulador fictício de investimento em criptomoedas.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://crypto.mazeloop.com/">
+
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%2307090b'/><rect x='5' y='5' width='90' height='90' rx='15' fill='none' stroke='%233ee886' stroke-width='6'/><text x='50%' y='62%' dominant-baseline='middle' text-anchor='middle' fill='%233ee886' font-family='sans-serif' font-weight='900' font-size='38'>CR</text></svg>">
+
+  <style>
+    :root{
+      --bg:#07090b;
+      --panel:#11151a;
+      --panel2:#171d24;
+      --green:#3ee886;
+      --red:#ff5b6f;
+      --yellow:#ffd21c;
+      --text:#f7f9fb;
+      --muted:#9aa6b2;
+      --border:rgba(255,255,255,.08);
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      min-height:100vh;
+      background:
+        radial-gradient(circle at 10% -10%,rgba(62,232,134,.12),transparent 28rem),
+        radial-gradient(circle at 90% 0%,rgba(255,210,28,.08),transparent 25rem),
+        var(--bg);
+      color:var(--text);
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    }
+
+    a{color:inherit;text-decoration:none}
+    .wrap{width:min(1180px,calc(100% - 24px));margin:auto}
+
+    header{
+      position:sticky;top:0;z-index:50;
+      background:rgba(7,9,11,.82);
+      backdrop-filter:blur(16px);
+      border-bottom:1px solid var(--border);
+    }
+
+    .nav{min-height:68px;display:flex;justify-content:space-between;align-items:center;gap:14px}
+    .logo{font-size:1.45rem;font-weight:1000;letter-spacing:-.05em}
+    .logo span{color:var(--green)}
+    .navsmall{font-size:.78rem;color:var(--muted)}
+
+    .hero{text-align:center;padding:60px 14px 34px}
+    .hero h1{font-size:clamp(2.4rem,7vw,5.6rem);line-height:.95;letter-spacing:-.07em}
+    .hero h1 span{color:var(--green)}
+    .hero p{max-width:700px;margin:16px auto 0;color:#bec7cf}
+
+    .grid-top{
+      display:grid;
+      grid-template-columns:1.2fr .8fr;
+      gap:16px;
+      margin-bottom:18px;
+    }
+
+    .panel{
+      border:1px solid var(--border);
+      background:linear-gradient(145deg,#151a20,#0d1115);
+      border-radius:18px;
+      padding:18px;
+    }
+
+    .panel h2{font-size:1.05rem;margin-bottom:12px}
+    .muted{color:var(--muted)}
+
+    .market{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:10px;
+    }
+
+    .coin{
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:14px;
+      background:#0d1115;
+    }
+
+    .coin-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+    .coin b{font-size:1rem}
+    .coin small{display:block;color:var(--muted);margin-top:4px}
+    .price{font-size:1.15rem;font-weight:900;margin-top:10px}
+    .up{color:var(--green)}
+    .down{color:var(--red)}
+
+    .sim-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin-top:10px;
+    }
+
+    label{font-size:.72rem;color:var(--muted);display:block;margin-bottom:5px}
+    select,input{
+      width:100%;
+      padding:12px;
+      border-radius:10px;
+      border:1px solid var(--border);
+      background:#0d1115;
+      color:white;
+      outline:none;
+    }
+
+    .btn{
+      width:100%;
+      margin-top:12px;
+      padding:12px;
+      border:0;
+      border-radius:10px;
+      background:var(--green);
+      color:#061009;
+      font-weight:950;
+      cursor:pointer;
+    }
+
+    .result-card{
+      margin-top:14px;
+      border:1px solid var(--border);
+      border-radius:14px;
+      background:#0b0f12;
+      padding:14px;
+    }
+
+    .result-big{font-size:1.7rem;font-weight:1000;margin-top:6px}
+    .rows{display:grid;gap:8px;margin-top:12px}
+    .row{display:flex;justify-content:space-between;gap:12px;color:#c7d0d7}
+    .row span:last-child{font-weight:850}
+
+    .section-title{display:flex;justify-content:space-between;align-items:end;margin:28px 2px 14px}
+    .section-title h2{font-size:1.15rem}
+    .section-title p{font-size:.78rem;color:var(--muted)}
+
+    .table-wrap{overflow:auto;border:1px solid var(--border);border-radius:16px}
+    table{width:100%;border-collapse:collapse;min-width:700px;background:#0d1115}
+    th,td{padding:13px 14px;text-align:left;border-bottom:1px solid var(--border)}
+    th{font-size:.68rem;letter-spacing:.08em;color:#7e8992}
+    td{font-size:.84rem}
+
+    .watch-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    .watch-card{
+      border:1px solid var(--border);
+      border-radius:15px;
+      background:#10151a;
+      padding:16px;
+    }
+
+    .watch-card h3{font-size:.95rem}
+    .watch-card p{color:var(--muted);font-size:.78rem;margin-top:8px}
+
+    .disclaimer{
+      margin:28px 0 0;
+      padding:15px;
+      border-radius:13px;
+      border:1px solid rgba(255,210,28,.16);
+      background:rgba(255,210,28,.04);
+      color:#c5bea5;
+      font-size:.76rem;
+    }
+
+    footer{
+      margin-top:38px;
+      border-top:1px solid var(--border);
+      padding:25px 0 36px;
+      color:#6f7a84;
+      font-size:.75rem;
+      text-align:center;
+    }
+
+    @media(max-width:900px){
+      .grid-top{grid-template-columns:1fr}
+      .watch-grid{grid-template-columns:1fr 1fr}
+    }
+
+    @media(max-width:620px){
+      .market,.sim-grid,.watch-grid{grid-template-columns:1fr}
+      .navsmall{display:none}
+      .hero{padding-top:48px}
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a class="logo" href="#">MAZELOOP <span>CRYPTO</span></a>
+    <div class="navsmall">Mercado + simulador fictício</div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="hero">
+    <h1>Veja o mercado.<br><span>Teste sem arriscar.</span></h1>
+    <p>
+      Acompanhe criptomoedas e simule quanto um investimento fictício estaria valendo agora.
+      Nenhuma operação real é realizada.
+    </p>
+  </section>
+
+  <section class="grid-top">
+
+    <div class="panel">
+      <h2>Mercado rápido</h2>
+
+      <div class="market">
+        <div class="coin">
+          <div class="coin-top"><b>Bitcoin</b><span>BTC</span></div>
+          <small>BTC/USDT</small>
+          <div class="price" id="btcPrice">Carregando...</div>
+          <div id="btcMove" class="muted">—</div>
+        </div>
+
+        <div class="coin">
+          <div class="coin-top"><b>Ethereum</b><span>ETH</span></div>
+          <small>ETH/USDT</small>
+          <div class="price" id="ethPrice">Carregando...</div>
+          <div id="ethMove" class="muted">—</div>
+        </div>
+
+        <div class="coin">
+          <div class="coin-top"><b>Solana</b><span>SOL</span></div>
+          <small>SOL/USDT</small>
+          <div class="price" id="solPrice">Carregando...</div>
+          <div id="solMove" class="muted">—</div>
+        </div>
+
+        <div class="coin">
+          <div class="coin-top"><b>XRP</b><span>XRP</span></div>
+          <small>XRP/USDT</small>
+          <div class="price" id="xrpPrice">Carregando...</div>
+          <div id="xrpMove" class="muted">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Simulador fictício</h2>
+      <p class="muted">Escolha uma moeda e um valor em reais para acompanhar a simulação.</p>
+
+      <div class="sim-grid">
+        <div>
+          <label>Criptomoeda</label>
+          <select id="coinSelect">
+            <option value="BTCUSDT">Bitcoin</option>
+            <option value="ETHUSDT">Ethereum</option>
+            <option value="SOLUSDT">Solana</option>
+            <option value="XRPUSDT">XRP</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Valor fictício</label>
+          <input id="amountInput" type="number" value="100" min="1">
+        </div>
+      </div>
+
+      <button class="btn" id="simulateBtn">COMEÇAR SIMULAÇÃO</button>
+
+      <div class="result-card">
+        <div class="muted">Resultado atual</div>
+        <div class="result-big" id="resultValue">R$ 0,00</div>
+
+        <div class="rows">
+          <div class="row"><span>Investido</span><span id="investedValue">R$ 0,00</span></div>
+          <div class="row"><span>Valor atual</span><span id="currentValue">R$ 0,00</span></div>
+          <div class="row"><span>Variação</span><span id="percentValue">0,00%</span></div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <section>
+    <div class="section-title">
+      <div>
+        <h2>Mercado acompanhado</h2>
+        <p>Dados públicos de preço em tempo real via API.</p>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>MOEDA</th>
+            <th>SÍMBOLO</th>
+            <th>PREÇO</th>
+            <th>STATUS</th>
+          </tr>
+        </thead>
+        <tbody id="marketTable">
+          <tr><td>Bitcoin</td><td>BTC</td><td id="tbBTC">—</td><td id="stBTC">—</td></tr>
+          <tr><td>Ethereum</td><td>ETH</td><td id="tbETH">—</td><td id="stETH">—</td></tr>
+          <tr><td>Solana</td><td>SOL</td><td id="tbSOL">—</td><td id="stSOL">—</td></tr>
+          <tr><td>XRP</td><td>XRP</td><td id="tbXRP">—</td><td id="stXRP">—</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-title">
+      <div>
+        <h2>Próximas ideias</h2>
+        <p>Blocos que podem entrar depois.</p>
+      </div>
+    </div>
+
+    <div class="watch-grid">
+      <div class="watch-card">
+        <h3>Se eu tivesse investido há 7 dias</h3>
+        <p>Calcular quanto R$100, R$500 ou R$1.000 estariam valendo hoje.</p>
+      </div>
+
+      <div class="watch-card">
+        <h3>Carteira fictícia</h3>
+        <p>Salvar várias moedas no navegador e acompanhar o resultado total.</p>
+      </div>
+
+      <div class="watch-card">
+        <h3>Maiores altas e quedas</h3>
+        <p>Mostrar quais moedas mais subiram ou caíram no período.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="disclaimer">
+    Simulação educacional. Nenhuma compra ou venda real é realizada e o site não oferece recomendação de investimento.
+  </div>
+
+</main>
+
+<footer>
+  © 2026 MazeLoop Crypto
+</footer>
+
+<script>
+  const endpoints = {
+    BTCUSDT: "https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT",
+    ETHUSDT: "https://api.binance.com/api/v3/ticker/price?symbol=ETHUSDT",
+    SOLUSDT: "https://api.binance.com/api/v3/ticker/price?symbol=SOLUSDT",
+    XRPUSDT: "https://api.binance.com/api/v3/ticker/price?symbol=XRPUSDT"
+  };
+
+  const lastPrices = {};
+  const prices = {};
+
+  let simulation = null;
+
+  function formatUsd(v){
+    return "US$ " + Number(v).toLocaleString("pt-BR", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  }
+
+  function formatBrl(v){
+    return Number(v).toLocaleString("pt-BR", {
+      style:"currency",
+      currency:"BRL"
+    });
+  }
+
+  function updateMove(symbol, price, el){
+    if(lastPrices[symbol] == null){
+      el.textContent = "Aguardando próxima leitura";
+      el.className = "muted";
+      return;
+    }
+
+    const diff = ((price - lastPrices[symbol]) / lastPrices[symbol]) * 100;
+
+    if(diff > 0){
+      el.textContent = "+" + diff.toFixed(4) + "%";
+      el.className = "up";
+    } else if(diff < 0){
+      el.textContent = diff.toFixed(4) + "%";
+      el.className = "down";
+    } else {
+      el.textContent = "0,0000%";
+      el.className = "muted";
+    }
+  }
+
+  async function fetchPrice(symbol){
+    const r = await fetch(endpoints[symbol]);
+    const d = await r.json();
+    return Number(d.price);
+  }
+
+  async function refreshMarket(){
+    try{
+      for(const symbol of Object.keys(endpoints)){
+        const p = await fetchPrice(symbol);
+        const previous = prices[symbol];
+
+        if(previous != null) lastPrices[symbol] = previous;
+        prices[symbol] = p;
+      }
+
+      btcPrice.textContent = formatUsd(prices.BTCUSDT);
+      ethPrice.textContent = formatUsd(prices.ETHUSDT);
+      solPrice.textContent = formatUsd(prices.SOLUSDT);
+      xrpPrice.textContent = formatUsd(prices.XRPUSDT);
+
+      updateMove("BTCUSDT", prices.BTCUSDT, btcMove);
+      updateMove("ETHUSDT", prices.ETHUSDT, ethMove);
+      updateMove("SOLUSDT", prices.SOLUSDT, solMove);
+      updateMove("XRPUSDT", prices.XRPUSDT, xrpMove);
+
+      tbBTC.textContent = formatUsd(prices.BTCUSDT);
+      tbETH.textContent = formatUsd(prices.ETHUSDT);
+      tbSOL.textContent = formatUsd(prices.SOLUSDT);
+      tbXRP.textContent = formatUsd(prices.XRPUSDT);
+
+      function status(symbol, el){
+        if(lastPrices[symbol] == null){
+          el.textContent = "Observando";
+          el.className = "";
+          return;
+        }
+
+        if(prices[symbol] > lastPrices[symbol]){
+          el.textContent = "Subindo";
+          el.className = "up";
+        }else if(prices[symbol] < lastPrices[symbol]){
+          el.textContent = "Caindo";
+          el.className = "down";
+        }else{
+          el.textContent = "Estável";
+          el.className = "";
+        }
+      }
+
+      status("BTCUSDT", stBTC);
+      status("ETHUSDT", stETH);
+      status("SOLUSDT", stSOL);
+      status("XRPUSDT", stXRP);
+
+      updateSimulation();
+
+    }catch(e){
+      console.error(e);
+    }
+  }
+
+  simulateBtn.addEventListener("click", () => {
+    const symbol = coinSelect.value;
+    const amount = Number(amountInput.value);
+
+    if(!prices[symbol] || amount <= 0) return;
+
+    simulation = {
+      symbol,
+      amount,
+      entryPrice: prices[symbol]
+    };
+
+    investedValue.textContent = formatBrl(amount);
+    updateSimulation();
+  });
+
+  function updateSimulation(){
+    if(!simulation) return;
+
+    const price = prices[simulation.symbol];
+    if(!price) return;
+
+    const variation = (price - simulation.entryPrice) / simulation.entryPrice;
+    const current = simulation.amount * (1 + variation);
+    const profit = current - simulation.amount;
+
+    resultValue.textContent = (profit >= 0 ? "+" : "") + formatBrl(profit);
+    resultValue.className = "result-big " + (profit > 0 ? "up" : profit < 0 ? "down" : "");
+
+    currentValue.textContent = formatBrl(current);
+    percentValue.textContent = (variation >= 0 ? "+" : "") + (variation * 100).toFixed(4) + "%";
+  }
+
+  refreshMarket();
+  setInterval(refreshMarket, 10000);
+</script>
+
+</body>
+</html>
